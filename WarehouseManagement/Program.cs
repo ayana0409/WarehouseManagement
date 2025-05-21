@@ -38,6 +38,16 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 app.UseCors("AllowSpecificOrigin");
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    if (!dbContext.Database.CanConnect())
+    {
+        dbContext.Database.EnsureCreated(); // Tạo cơ sở dữ liệu nếu chưa có
+        dbContext.Database.Migrate(); // Áp dụng các migration đã có
+    }
+}
 
 
 
