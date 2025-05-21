@@ -65,7 +65,7 @@ namespace WarehouseManagement.Repositories
             if (dto.Code != null) emp.Code = dto.Code;
             if (dto.Password != null) emp.Password = dto.Password; // Bạn có thể hash lại tại đây nếu cần
             if (dto.Gender.HasValue) emp.Gender = dto.Gender.Value;
-            if (dto.Tel.HasValue) emp.Tel = dto.Tel.Value;
+            if (dto.Tel != null) emp.Tel = dto.Tel;
             if (dto.Email != null) emp.Email = dto.Email;
             if (dto.Address != null) emp.Address = dto.Address;
             if (dto.Role.HasValue) emp.Role = dto.Role.Value;

@@ -17,7 +17,9 @@ namespace WarehouseManagement.Repository
         public IEmployeeRepository EmployeeRepository { get; }
         public IWarehouseRepository WarehouseRepository { get; }
         public IWarehouseDetailRepository? WarehouseDetailRepository { get; }
-
+        public IExportDetailRepository? ExportDetailRepository { get; }
+        public IImportRepository? ImportRepository { get; }
+        public IImportDetailRepository? ImportDetailRepository { get; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -28,6 +30,9 @@ namespace WarehouseManagement.Repository
             EmployeeRepository = new EmployeeRepository(_context);
             WarehouseRepository = new WarehouseRepository(_context);
             WarehouseDetailRepository = new WarehouseDetailRepository(_context);
+            ExportDetailRepository = new ExportDetailRepository(_context);
+            ImportRepository = new ImportRepository(_context);
+            ImportDetailRepository = new ImportDetailRepository(_context);
         }
 
         public IGenericRepository<T> Repository<T>() where T : class

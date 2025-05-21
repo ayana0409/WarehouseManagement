@@ -19,9 +19,24 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
-builder.WebHost.UseKestrel().UseUrls("http://0.0.0.0:5000"); // Chạy trên tất cả IP
-
+//builder.WebHost.UseKestrel().UseUrls("http://0.0.0.0:5000"); // Chạy trên tất cả IP
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder =>
+        {
+        //    builder.AllowAnyOrigin()
+        //           .AllowAnyMethod()
+        //           .AllowAnyHeader();
+            builder.WithOrigins("http://localhost:3000", "http://26.139.159.129", "http://26.139.159.129:3000", "http://localhost:3001")
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+}
+    );
+});
 var app = builder.Build();
+app.UseCors("AllowSpecificOrigin");
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
 

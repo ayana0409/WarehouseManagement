@@ -14,6 +14,9 @@ namespace WarehouseManagement.Repository.Abtraction
         IProductRepository ProductRepository { get; }
         IEmployeeRepository EmployeeRepository { get; }
         IWarehouseRepository WarehouseRepository { get; }
-        IWarehouseDetailRepository? WarehouseDetailRepository { get; }
+        IWarehouseDetailRepository WarehouseDetailRepository { get; }
+        IExportDetailRepository ExportDetailRepository { get; }
+        IImportRepository ImportRepository { get; }
+        IImportDetailRepository ImportDetailRepository { get; }
     }
 }

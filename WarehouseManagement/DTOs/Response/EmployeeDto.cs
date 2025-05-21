@@ -6,7 +6,7 @@
         public string Name { get; set; }
         public string Code { get; set; }
         public bool Gender { get; set; }
-        public int? Tel { get; set; }
+        public string? Tel { get; set; }
         public string? Email { get; set; }
         public string? Address { get; set; }
         public string RoleName { get; set; }

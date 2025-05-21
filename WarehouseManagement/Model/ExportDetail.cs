@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using WarehouseManagement.Share;
 
 namespace WarehouseManagement.Model
 {
-    public class ExportDetail
+    public class ExportDetail : BaseEntity
     {
         public int ExId { get; set; }
 
