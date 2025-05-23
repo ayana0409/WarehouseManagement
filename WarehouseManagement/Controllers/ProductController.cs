@@ -93,6 +93,8 @@ namespace WarehouseManagement.Controllers
                     Image = p.Image,
                     Unit = p.Unit,
                     Expiry = p.Expiry,
+                    CreatedDate = p.CreateDate,
+                    Quantity = p.Quantity,
                     ManufacturerName = p.Manufacturer != null ? p.Manufacturer.ManuName : null,
                     CategoryName = p.Category != null ? p.Category.Name : null
                 }).ToListAsync();
@@ -114,6 +116,8 @@ namespace WarehouseManagement.Controllers
                     Image = p.Image,
                     Unit = p.Unit,
                     Expiry = p.Expiry,
+                    CreatedDate = p.CreateDate,
+                    Quantity = p.Quantity,
                     ManufacturerName = p.Manufacturer != null ? p.Manufacturer.ManuName : null,
                     CategoryName = p.Category != null ? p.Category.Name : null
                 }).FirstOrDefaultAsync();

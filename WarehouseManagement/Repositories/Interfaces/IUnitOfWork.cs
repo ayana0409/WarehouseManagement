@@ -18,5 +18,6 @@ namespace WarehouseManagement.Repository.Abtraction
         IExportDetailRepository ExportDetailRepository { get; }
         IImportRepository ImportRepository { get; }
         IImportDetailRepository ImportDetailRepository { get; }
+        IExportRepository ExportRepository { get; }
     }
 }

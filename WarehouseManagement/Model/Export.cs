@@ -13,7 +13,7 @@ namespace WarehouseManagement.Model
         public double TotalPrice { get; set; } = 0;
         public string ConsumerName { get; set; }
         public string? Tel { get; set; }
-        public int? Address { get; set; }
+        public string? Address { get; set; }
 
         [ForeignKey(nameof(EmployId))]
         public Employee? Employee { get; set; }

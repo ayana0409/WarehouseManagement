@@ -20,6 +20,7 @@ namespace WarehouseManagement.Repository
         public IExportDetailRepository? ExportDetailRepository { get; }
         public IImportRepository? ImportRepository { get; }
         public IImportDetailRepository? ImportDetailRepository { get; }
+        public IExportRepository? ExportRepository { get; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -33,6 +34,7 @@ namespace WarehouseManagement.Repository
             ExportDetailRepository = new ExportDetailRepository(_context);
             ImportRepository = new ImportRepository(_context);
             ImportDetailRepository = new ImportDetailRepository(_context);
+            ExportRepository = new ExportRepository(_context);
         }
 
         public IGenericRepository<T> Repository<T>() where T : class

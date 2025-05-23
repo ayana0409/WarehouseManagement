@@ -35,26 +35,22 @@ public class ExportDetailController : ControllerBase
         };
 
         await _unitOfWork.ExportDetailRepository.AddAsync(entity);
-        await _unitOfWork.CommitAsync();
+        await _unitOfWork.SaveChangesAsync();
         return Ok();
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] ExportDetailUpdateDto dto)
     {
-        var entity = await _context.ExportDetails
-            .FirstOrDefaultAsync(x => x.Id == id);
-
+        var repo = _context.Set<ExportDetail>();
+        var entity = await repo.Where(x => x.Id.Equals(id)).FirstOrDefaultAsync();
         if (entity == null) return NotFound();
 
-        entity.ExId = dto.ExId ?? entity.ExId;
-        entity.ProId = dto.ProId ?? entity.ProId;
-        entity.WareId = dto.WareId ?? entity.WareId;
         entity.Quantity = dto.Quantity ?? entity.Quantity;
         entity.Price = dto.Price ?? entity.Price;
 
-        _unitOfWork.ExportDetailRepository.Update(entity);
-        await _unitOfWork.CommitAsync();
+        repo.Update(entity);
+        await _context.SaveChangesAsync();
 
         var productName = await _context.Products
             .Where(p => p.Id == entity.ProId)
@@ -81,7 +77,7 @@ public class ExportDetailController : ControllerBase
         if (entity == null) return NotFound();
 
         _unitOfWork.ExportDetailRepository.Delete(entity);
-        await _unitOfWork.CommitAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         return Ok();
     }
@@ -97,6 +93,7 @@ public class ExportDetailController : ControllerBase
 
         return Ok(new ExportDetailDto
         {
+            Id = exId,
             ExId = entity.ExId,
             ProId = entity.ProId,
             ProductName = entity.Product?.ProName,
@@ -115,6 +112,7 @@ public class ExportDetailController : ControllerBase
 
         var result = list.Select(entity => new ExportDetailDto
         {
+            Id = entity.Id,
             ExId = entity.ExId,
             ProId = entity.ProId,
             ProductName = entity.Product?.ProName,

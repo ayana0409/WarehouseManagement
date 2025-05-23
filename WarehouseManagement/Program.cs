@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿
+using Microsoft.EntityFrameworkCore;
 using WarehouseManagement;
 using WarehouseManagement.Repository.Abtraction;
 using WarehouseManagement.Repository;

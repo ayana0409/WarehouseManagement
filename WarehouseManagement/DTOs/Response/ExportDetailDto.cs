@@ -2,6 +2,7 @@ namespace WarehouseManagement.DTOs.Response;
 
 public class ExportDetailDto
 {
+    public int Id { get; set; }
     public int ExId { get; set; }
     public int ProId { get; set; }
     public string? ProductName { get; set; }

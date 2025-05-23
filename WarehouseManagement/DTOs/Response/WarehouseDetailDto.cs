@@ -9,6 +9,7 @@ namespace WarehouseManagement.DTOs.Response
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public int? WareId { get; set; }
         public string ProductName { get; set; }
+        public string Image { get; set; }
         public double Quantity { get; set; }
     }
 }

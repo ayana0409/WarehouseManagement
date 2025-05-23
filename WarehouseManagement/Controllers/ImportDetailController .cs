@@ -41,8 +41,8 @@ public class ImportDetailController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] ImportDetailUpdateDto dto)
     {
-        var repo = _unitOfWork.Repository<ImportDetail>();
-        var entity = await repo.GetByIdAsync(id);
+        var repo = _context.Set<ImportDetail>();
+        var entity = await repo.Where(x => x.Id.Equals(id)).FirstOrDefaultAsync();
         if (entity == null) return NotFound();
 
         entity.ProId = dto.ProId ?? entity.ProId;

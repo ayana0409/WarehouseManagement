@@ -32,7 +32,8 @@ namespace WarehouseManagement.Repositories
                     {
                         ProductId = d.ProId,
                         ProductName = d.Product!.ProName,
-                        Quantity = d.Quantity
+                        Quantity = d.Quantity,
+                        Image = d.Product.Image,
                     }).ToList()
                 })
                 .FirstOrDefaultAsync();
