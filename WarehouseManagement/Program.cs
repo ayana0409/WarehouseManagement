@@ -1,9 +1,8 @@
-﻿
-using Microsoft.EntityFrameworkCore;
-using WarehouseManagement;
+﻿using Microsoft.EntityFrameworkCore;
+using WarehouseManagement.Share;
 using WarehouseManagement.Repository.Abtraction;
 using WarehouseManagement.Repository;
-using WarehouseManagement.Share;
+using WarehouseManagement;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,31 +25,18 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigin",
         builder =>
         {
-        //    builder.AllowAnyOrigin()
-        //           .AllowAnyMethod()
-        //           .AllowAnyHeader();
-            builder.WithOrigins("http://localhost:3000", "http://26.139.159.129", "http://26.139.159.129:3000", "http://localhost:3001")
+            //    builder.AllowAnyOrigin()
+            //           .AllowAnyMethod()
+            //           .AllowAnyHeader();
+            builder.WithOrigins("http://localhost:3000", "http://26.139.159.129", "http://127.0.0.1:3000", "http://26.139.159.129:3000", "https://tough-crisp-malamute.ngrok-free.app")
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials();
-}
+        }
     );
 });
 var app = builder.Build();
-app.UseCors("AllowSpecificOrigin");
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-    if (!dbContext.Database.CanConnect())
-    {
-        dbContext.Database.EnsureCreated(); // Tạo cơ sở dữ liệu nếu chưa có
-        dbContext.Database.Migrate(); // Áp dụng các migration đã có
-    }
-}
-
-
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -58,8 +44,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseHttpsRedirection();
+app.UseRouting();
+app.UseCors("AllowSpecificOrigin");
+//app.UseHttpsRedirection();
 
 app.UseAuthorization();
 

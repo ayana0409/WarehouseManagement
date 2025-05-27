@@ -75,15 +75,18 @@ namespace WarehouseManagement.Controllers
             return NoContent();
         }
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] bool? isActive = true)
+        public async Task<IActionResult> GetAll([FromQuery] bool? isActive = null, [FromQuery] string? keyWord = null)
         {
-            var query = _unitOfWork.ProductRepository.GetAll()
+            var query = _unitOfWork.ProductRepository
+                .GetAll(x => keyWord == null || x.ProName.Contains(keyWord))
                 .Include(p => p.Manufacturer)
                 .Include(p => p.Category)
                 .AsQueryable();
 
             if (isActive.HasValue)
-                query = query.Where(p => p.IsActive == isActive.Value);
+            {
+                query = query.Where(p => p.IsActive == isActive);
+            }
 
             var result = await query
                 .Select(p => new ProductDto
@@ -96,7 +99,8 @@ namespace WarehouseManagement.Controllers
                     CreatedDate = p.CreateDate,
                     Quantity = p.Quantity,
                     ManufacturerName = p.Manufacturer != null ? p.Manufacturer.ManuName : null,
-                    CategoryName = p.Category != null ? p.Category.Name : null
+                    CategoryName = p.Category != null ? p.Category.Name : null,
+                    IsActive = p.IsActive
                 }).ToListAsync();
 
             return Ok(result);

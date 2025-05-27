@@ -2,8 +2,8 @@
 {
     public enum RoleEnum
     {
-        Employee,
-        Manager,
-        Admin
+        Employee = 1,
+        Manager = 2,
+        Admin = 3
     }
 }

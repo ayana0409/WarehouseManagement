@@ -29,7 +29,7 @@ namespace WarehouseManagement.Controllers
                 Status = dto.Status,
                 Email = dto.Email,
                 EmployId = dto.EmployId,
-                
+
             };
             await _unitOfWork.ImportRepository.AddAsync(import);
             await _unitOfWork.SaveChangesAsync();

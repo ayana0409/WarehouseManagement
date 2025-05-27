@@ -2,6 +2,7 @@
 using WarehouseManagement.DTOs.Request;
 using WarehouseManagement.Model;
 using WarehouseManagement.Repository.Abtraction;
+using WarehouseManagement.Share.Enumeration;
 
 namespace WarehouseManagement.Controllers
 {
@@ -53,6 +54,17 @@ namespace WarehouseManagement.Controllers
             employee.IsActive = false;
             await _uow.SaveChangesAsync();
             return Ok();
+        }
+
+        [HttpGet("Roles")]
+        public async Task<IActionResult> GetRole()
+        {
+            var result = new Dictionary<int, string>();
+            foreach (var item in Enum.GetValues(typeof(RoleEnum)))
+            {
+                result.Add((int)item, item.ToString());
+            }
+            return Ok(result);
         }
     }
 

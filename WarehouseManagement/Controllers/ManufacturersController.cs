@@ -17,9 +17,21 @@ namespace WarehouseManagement.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] bool? isActive = null)
+        public async Task<IActionResult> GetAll([FromQuery] bool? isActive = null, [FromQuery] string? keyWord = null)
         {
             var result = await _unitOfWork.ManufacturerRepository.GetAllDtoAsync(isActive);
+
+            if (isActive == null && string.IsNullOrEmpty(keyWord))
+            {
+                result = result.Where(x => keyWord == null ||
+                            x.ManuName.Contains(keyWord) ||
+                            x.Address.Contains(keyWord) ||
+                            x.Tel.Contains(keyWord) ||
+                            x.Email.Contains(keyWord) ||
+                            x.Website.Contains(keyWord));
+                return Ok(result);
+            }
+
             return Ok(result);
         }
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using WarehouseManagement.Repository.Abtraction;
 
 namespace WarehouseManagement.Repository
@@ -18,8 +19,12 @@ namespace WarehouseManagement.Repository
             return await _dbSet.FindAsync(id);
         }
 
-        public IQueryable<T> GetAll()
+        public IQueryable<T> GetAll(Expression<Func<T, bool>>? predicate = null)
         {
+            if (predicate != null)
+            {
+                return _dbSet.Where(predicate).AsQueryable();
+            }
             return _dbSet.AsQueryable();
         }
 
