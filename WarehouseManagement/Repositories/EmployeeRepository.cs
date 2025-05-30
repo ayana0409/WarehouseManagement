@@ -63,7 +63,6 @@ namespace WarehouseManagement.Repositories
 
             if (dto.Name != null) emp.Name = dto.Name;
             if (dto.Code != null) emp.Code = dto.Code;
-            if (dto.Password != null) emp.Password = dto.Password; // Bạn có thể hash lại tại đây nếu cần
             if (dto.Gender.HasValue) emp.Gender = dto.Gender.Value;
             if (dto.Tel != null) emp.Tel = dto.Tel;
             if (dto.Email != null) emp.Email = dto.Email;
@@ -73,6 +72,14 @@ namespace WarehouseManagement.Repositories
 
             _context.Employees.Update(emp);
             return emp;
+        }
+
+        
+        public async Task<Employee?> GetByCode(string code)
+        {
+            return await _context.Employees
+                .Where(x => x.Code == code)
+                .FirstOrDefaultAsync();
         }
     }
 

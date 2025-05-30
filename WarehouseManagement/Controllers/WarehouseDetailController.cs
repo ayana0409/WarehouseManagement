@@ -43,7 +43,19 @@ namespace WarehouseManagement.Controllers
                 Quantity = dto.Quantity
             };
 
-            await _unitOfWork.WarehouseDetailRepository.AddAsync(entity);
+            var existDetail = _unitOfWork.WarehouseDetailRepository
+            .GetAll(x => x.WareId.Equals(dto.WareId) && x.ProId.Equals(dto.ProId)).FirstOrDefault();
+
+            if (existDetail == null)
+            {
+                await _unitOfWork.WarehouseDetailRepository.AddAsync(entity);
+            }
+            else
+            {
+                existDetail.Quantity += dto.Quantity;
+                entity = existDetail;
+                _unitOfWork.WarehouseDetailRepository.Update(existDetail);
+            }
             await _unitOfWork.SaveChangesAsync();
             await _unitOfWork.CommitAsync();
 

@@ -11,5 +11,6 @@ namespace WarehouseManagement.DTOs.Response
         public string ProductName { get; set; }
         public string Image { get; set; }
         public double Quantity { get; set; }
+        public string Unit { get; set; }
     }
 }

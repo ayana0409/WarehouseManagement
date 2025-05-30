@@ -10,6 +10,7 @@ namespace WarehouseManagement.Repositories.Interfaces
         Task<IEnumerable<EmployeeDto>> GetAllAsync(bool? isActive = null);
         Task<EmployeeDto?> GetDetailAsync(int id);
         Task<Employee> UpdatePartialAsync(int id, EmployeeUpdateDto dto);
+        Task<Employee?> GetByCode(string code);
     }
 
 }

@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WarehouseManagement.DTOs.Request;
 using WarehouseManagement.Model;
 using WarehouseManagement.Repository.Abtraction;
+using WarehouseManagement.Share.Enumeration;
 
 namespace WarehouseManagement.Controllers
 {
     [ApiController]
+    //[Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     public class CategoriesController : ControllerBase
     {

@@ -6,7 +6,6 @@ namespace WarehouseManagement.DTOs.Request
     {
         public string? Name { get; set; }
         public string? Code { get; set; }
-        public string? Password { get; set; }
         public bool? Gender { get; set; }
         public string? Tel { get; set; }
         public string? Email { get; set; }

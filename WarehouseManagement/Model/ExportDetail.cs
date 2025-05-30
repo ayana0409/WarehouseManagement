@@ -23,5 +23,9 @@ namespace WarehouseManagement.Model
         [JsonIgnore]
         [ForeignKey(nameof(ExId))]
         public Export ExportInfo { get; set; }
+
+        [JsonIgnore]
+        [ForeignKey(nameof(ExId))]
+        public Warehouse WarehouseInfo { get; set; }
     }
 }
