@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using WarehouseManagement.Share;
+using WarehouseManagement.Share.Enumeration;
 
 namespace WarehouseManagement.Model
 {
@@ -21,11 +22,7 @@ namespace WarehouseManagement.Model
         public Product? Product { get; set; }
 
         [JsonIgnore]
-        [ForeignKey(nameof(ExId))]
-        public Export ExportInfo { get; set; }
-
-        [JsonIgnore]
-        [ForeignKey(nameof(ExId))]
-        public Warehouse WarehouseInfo { get; set; }
+        [ForeignKey(nameof(WareId))]
+        public Warehouse? WarehouseInfo { get; set; }
     }
 }

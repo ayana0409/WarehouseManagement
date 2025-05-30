@@ -123,3 +123,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
+
+//dotnet run --project "D:\CSharp\HeThongThongTin\WarehouseManagement\WarehouseManagement\WarehouseManagement.csproj"

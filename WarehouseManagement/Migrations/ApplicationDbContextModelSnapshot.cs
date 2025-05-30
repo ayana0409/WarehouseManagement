@@ -112,6 +112,9 @@ namespace WarehouseManagement.Migrations
                     b.Property<double>("Quantity")
                         .HasColumnType("float");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<string>("Tel")
                         .HasColumnType("nvarchar(max)");
 

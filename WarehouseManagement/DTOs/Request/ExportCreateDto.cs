@@ -1,4 +1,6 @@
-﻿namespace WarehouseManagement.DTOs.Request
+﻿using WarehouseManagement.Share.Enumeration;
+
+namespace WarehouseManagement.DTOs.Request
 {
     public class ExportCreateDto
     {
@@ -8,6 +10,7 @@
         public string? ConsumerName { get; set; }
         public string? Tel { get; set; }
         public string? Address { get; set; }
+        public ExportEnum? Status { get; set; }
     }
 
 }

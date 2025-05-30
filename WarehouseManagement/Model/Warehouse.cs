@@ -11,6 +11,7 @@ namespace WarehouseManagement.Model
         public bool IsActive { get; set; } = true;
 
         public ICollection<WarehouseDetail>? WarehouseDetails { get; set; }
+        //public ICollection<ExportDetail>? ExportDetails { get; set; }
     }
 
 }

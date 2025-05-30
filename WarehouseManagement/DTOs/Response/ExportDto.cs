@@ -1,4 +1,6 @@
-﻿namespace WarehouseManagement.DTOs.Response
+﻿using WarehouseManagement.Share.Enumeration;
+
+namespace WarehouseManagement.DTOs.Response
 {
     public class ExportDto
     {
@@ -10,6 +12,7 @@
         public string ConsumerName { get; set; }
         public string? Tel { get; set; }
         public string? Address { get; set; }
-        public IEnumerable<ExportDetailDto> ExportDetails { get; set; }
+        public ExportEnum? Status { get; set; }
+        public IEnumerable<ExportDetailDto>? ExportDetails { get; set; }
     }
 }

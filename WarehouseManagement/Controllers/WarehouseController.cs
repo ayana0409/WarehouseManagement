@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WarehouseManagement.DTOs.Request;
 using WarehouseManagement.DTOs.Response;
@@ -8,6 +9,7 @@ using WarehouseManagement.Repository.Abtraction;
 namespace WarehouseManagement.Controllers
 {
     [ApiController]
+    //[Authorize]
     [Route("api/[controller]")]
     public class WarehouseController : ControllerBase
     {

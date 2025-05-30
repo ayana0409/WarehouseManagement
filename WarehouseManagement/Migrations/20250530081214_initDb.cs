@@ -36,7 +36,7 @@ namespace WarehouseManagement.Migrations
                     Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Gender = table.Column<bool>(type: "bit", nullable: false),
-                    Tel = table.Column<int>(type: "int", nullable: true),
+                    Tel = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Role = table.Column<int>(type: "int", nullable: false),
@@ -94,7 +94,8 @@ namespace WarehouseManagement.Migrations
                     TotalPrice = table.Column<double>(type: "float", nullable: false),
                     ConsumerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Tel = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Address = table.Column<int>(type: "int", nullable: true)
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Status = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -148,7 +149,7 @@ namespace WarehouseManagement.Migrations
                     Quantity = table.Column<double>(type: "float", nullable: false),
                     Unit = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Expiry = table.Column<int>(type: "int", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: true)
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -176,7 +177,10 @@ namespace WarehouseManagement.Migrations
                     WareId = table.Column<int>(type: "int", nullable: false),
                     Quantity = table.Column<double>(type: "float", nullable: false),
                     Price = table.Column<double>(type: "float", nullable: true),
-                    ExportId = table.Column<int>(type: "int", nullable: true)
+                    Status = table.Column<int>(type: "int", nullable: true),
+                    ExportId = table.Column<int>(type: "int", nullable: true),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1")
                 },
                 constraints: table =>
                 {
@@ -203,16 +207,18 @@ namespace WarehouseManagement.Migrations
                     Quantity = table.Column<double>(type: "float", nullable: false),
                     Price = table.Column<double>(type: "float", nullable: false),
                     ManuDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ImportId = table.Column<int>(type: "int", nullable: true)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ImportDetails", x => new { x.ProId, x.ImpId });
                     table.ForeignKey(
-                        name: "FK_ImportDetails_Imports_ImportId",
-                        column: x => x.ImportId,
+                        name: "FK_ImportDetails_Imports_ImpId",
+                        column: x => x.ImpId,
                         principalTable: "Imports",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_ImportDetails_Products_ProId",
                         column: x => x.ProId,
@@ -227,8 +233,7 @@ namespace WarehouseManagement.Migrations
                 {
                     ProId = table.Column<int>(type: "int", nullable: false),
                     WareId = table.Column<int>(type: "int", nullable: false),
-                    Quantity = table.Column<double>(type: "float", nullable: false),
-                    WarehouseId = table.Column<int>(type: "int", nullable: true)
+                    Quantity = table.Column<double>(type: "float", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -240,10 +245,11 @@ namespace WarehouseManagement.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_WarehouseDetails_Warehouses_WarehouseId",
-                        column: x => x.WarehouseId,
+                        name: "FK_WarehouseDetails_Warehouses_WareId",
+                        column: x => x.WareId,
                         principalTable: "Warehouses",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -262,9 +268,9 @@ namespace WarehouseManagement.Migrations
                 column: "EmployId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ImportDetails_ImportId",
+                name: "IX_ImportDetails_ImpId",
                 table: "ImportDetails",
-                column: "ImportId");
+                column: "ImpId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Imports_EmployId",
@@ -282,9 +288,9 @@ namespace WarehouseManagement.Migrations
                 column: "ManuId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_WarehouseDetails_WarehouseId",
+                name: "IX_WarehouseDetails_WareId",
                 table: "WarehouseDetails",
-                column: "WarehouseId");
+                column: "WareId");
         }
 
         /// <inheritdoc />

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using WarehouseManagement.Share;
+using WarehouseManagement.Share.Enumeration;
 
 namespace WarehouseManagement.Model
 {
@@ -14,6 +15,7 @@ namespace WarehouseManagement.Model
         public string ConsumerName { get; set; }
         public string? Tel { get; set; }
         public string? Address { get; set; }
+        public ExportEnum Status { get; set; } = ExportEnum.Pending;
 
         [ForeignKey(nameof(EmployId))]
         public Employee? Employee { get; set; }

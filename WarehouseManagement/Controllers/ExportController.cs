@@ -4,6 +4,7 @@ using WarehouseManagement.DTOs.Request;
 using WarehouseManagement.DTOs.Response;
 using WarehouseManagement.Model;
 using WarehouseManagement.Repository.Abtraction;
+using WarehouseManagement.Share.Enumeration;
 
 namespace WarehouseManagement.Controllers
 {
@@ -32,7 +33,8 @@ namespace WarehouseManagement.Controllers
                     TotalPrice = dto.TotalPrice,
                     ConsumerName = dto.ConsumerName,
                     Tel = dto.Tel,
-                    Address = dto.Address
+                    Address = dto.Address,
+                    Status = ExportEnum.Pending,
                 };
 
                 await _unitOfWork.Repository<Export>().AddAsync(entity);
@@ -58,7 +60,8 @@ namespace WarehouseManagement.Controllers
                     TotalPrice = dto.ExportDetails != null ? dto.ExportDetails.Sum(x => x.Price * x.Quantity)! : 0,
                     ConsumerName = dto.ConsumerName,
                     Tel = dto.Tel,
-                    Address = dto.Address
+                    Address = dto.Address,
+                    Status = ExportEnum.Pending,
                 };
 
                 await _unitOfWork.Repository<Export>().AddAsync(entity);
@@ -102,6 +105,7 @@ namespace WarehouseManagement.Controllers
             entity.ConsumerName = dto.ConsumerName ?? entity.ConsumerName;
             entity.Tel = dto.Tel ?? entity.Tel;
             entity.Address = dto.Address ?? entity.Address;
+            entity.Status = dto.Status ?? entity.Status;
 
             repo.Update(entity);
             await _unitOfWork.SaveChangesAsync();
@@ -148,6 +152,7 @@ namespace WarehouseManagement.Controllers
                 entity.ConsumerName = dto.ConsumerName ?? entity.ConsumerName;
                 entity.Tel = dto.Tel ?? entity.Tel;
                 entity.Address = dto.Address ?? entity.Address;
+                entity.Status = dto.Status ?? entity.Status;
 
                 _unitOfWork.Repository<Export>().Update(entity);
                 await _unitOfWork.SaveChangesAsync();
@@ -182,6 +187,10 @@ namespace WarehouseManagement.Controllers
                     .ThenInclude(d => d.Product)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
+            var whs = new List<Warehouse>();
+            if (entity.ExportDetails.Any())
+                _unitOfWork.WarehouseRepository.GetAll(x => entity.ExportDetails.Select(x => x.WareId).Contains(x.Id));
+
             if (entity == null) return NotFound();
 
             var dto = new ExportDto
@@ -194,6 +203,7 @@ namespace WarehouseManagement.Controllers
                 ConsumerName = entity.ConsumerName,
                 Tel = entity.Tel,
                 Address = entity.Address,
+                Status = entity.Status,
                 ExportDetails = entity.ExportDetails?.Select(d => new ExportDetailDto
                 {
                     Id = d.Id,
@@ -202,8 +212,9 @@ namespace WarehouseManagement.Controllers
                     WareId = d.WareId,
                     Quantity = d.Quantity,
                     Price = d.Price,
-                    WarehouseName = d.WarehouseInfo?.WareName,
-                    ProductName = d.Product?.ProName
+                    WarehouseName = whs.Where(x => x.Id.Equals(d.WareId)).FirstOrDefault().WareName ?? null,
+                    ProductName = d.Product?.ProName,
+                    Unit = d.Product?.Unit ?? string.Empty
                 }).ToList() ?? new()
             };
 
@@ -219,6 +230,12 @@ namespace WarehouseManagement.Controllers
                     .ThenInclude(d => d.Product)
                 .ToListAsync();
 
+            var whs = _unitOfWork.WarehouseRepository.GetAll();
+
+            var detail = _unitOfWork.ExportDetailRepository.GetAll(x => entities.Select(x => x.Id).Contains(x.ExId))
+                .Include(x => x.WarehouseInfo)
+                .Include(x => x.Product);
+
             var dtos = entities.Select(entity => new ExportDto
             {
                 Id = entity.Id,
@@ -229,15 +246,17 @@ namespace WarehouseManagement.Controllers
                 ConsumerName = entity.ConsumerName,
                 Tel = entity.Tel,
                 Address = entity.Address,
-                ExportDetails = entity.ExportDetails?.Select(d => new ExportDetailDto
+                Status = entity.Status,
+                ExportDetails = detail.Where(x => x.ExId.Equals(entity.Id)).Select(d => new ExportDetailDto
                 {
                     ExId = d.ExId,
                     ProId = d.ProId,
                     WareId = d.WareId,
                     Quantity = d.Quantity,
                     Price = d.Price,
-                    WarehouseName = d.WarehouseInfo?.WareName,
-                    ProductName = d.Product?.ProName
+                    WarehouseName = whs.Where(x => x.Id.Equals(d.WareId)).FirstOrDefault().WareName ?? null,
+                    ProductName = d.Product.ProName,
+                    Unit = d.Product.Unit ?? string.Empty
                 }).ToList() ?? new()
             });
 

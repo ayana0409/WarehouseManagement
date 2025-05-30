@@ -12,8 +12,8 @@ using WarehouseManagement;
 namespace WarehouseManagement.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250521030919_changeProp2")]
-    partial class changeProp2
+    [Migration("20250530081214_initDb")]
+    partial class initDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -99,8 +99,8 @@ namespace WarehouseManagement.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("Address")
-                        .HasColumnType("int");
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ConsumerName")
                         .IsRequired()
@@ -114,6 +114,9 @@ namespace WarehouseManagement.Migrations
 
                     b.Property<double>("Quantity")
                         .HasColumnType("float");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<string>("Tel")
                         .HasColumnType("nvarchar(max)");
@@ -153,6 +156,9 @@ namespace WarehouseManagement.Migrations
 
                     b.Property<double>("Quantity")
                         .HasColumnType("float");
+
+                    b.Property<int?>("Status")
+                        .HasColumnType("int");
 
                     b.HasKey("ExId", "ProId", "WareId");
 
@@ -221,9 +227,6 @@ namespace WarehouseManagement.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ImportId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("ManuDate")
                         .HasColumnType("datetime2");
 
@@ -235,7 +238,7 @@ namespace WarehouseManagement.Migrations
 
                     b.HasKey("ProId", "ImpId");
 
-                    b.HasIndex("ImportId");
+                    b.HasIndex("ImpId");
 
                     b.ToTable("ImportDetails");
                 });
@@ -407,15 +410,19 @@ namespace WarehouseManagement.Migrations
 
             modelBuilder.Entity("WarehouseManagement.Model.ImportDetail", b =>
                 {
-                    b.HasOne("WarehouseManagement.Model.Import", null)
+                    b.HasOne("WarehouseManagement.Model.Import", "Import")
                         .WithMany("ImportDetails")
-                        .HasForeignKey("ImportId");
+                        .HasForeignKey("ImpId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("WarehouseManagement.Model.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Import");
 
                     b.Navigation("Product");
                 });
