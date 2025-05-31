@@ -20,12 +20,15 @@ namespace WarehouseManagement.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] bool? isActive)
+        public async Task<IActionResult> GetAll([FromQuery] bool? isActive, [FromQuery] string? keyWord)
         {
             var query = _uow.WarehouseRepository.GetAll();
 
             if (isActive.HasValue)
                 query = query.Where(w => w.IsActive == isActive.Value);
+
+            if (!string.IsNullOrEmpty(keyWord))
+                query = query.Where(w => w.WareName.Contains(keyWord) || w.Address.Contains(keyWord) || w.Tel.Contains(keyWord) || (w.Email != null && w.Email.Contains(keyWord)));
 
             var list = await query.Select(w => new WarehouseDto
             {
@@ -99,6 +102,57 @@ namespace WarehouseManagement.Controllers
             await _uow.CommitAsync();
 
             return NoContent();
+        }
+
+        [HttpPost("transfer")]
+        public async Task<IActionResult> Transfer([FromBody] TransferWhRequestDto transferRequest)
+        {
+            if (transferRequest.Transfers == null || !transferRequest.Transfers.Any())
+                return BadRequest("Danh sách chuyển kho không được để trống.");
+            await _uow.BeginTransactionAsync();
+            try
+            {
+                foreach (var transfer in transferRequest.Transfers)
+                {
+                    var sourceDetail = _uow.WarehouseDetailRepository.GetAll(x => x.WareId == transfer.SourceId && x.ProId == transfer.ProductId).FirstOrDefault();
+                    var targetDetail = _uow.WarehouseDetailRepository.GetAll(x => x.WareId == transfer.TargetId && x.ProId == transfer.ProductId).FirstOrDefault();
+
+                    if (sourceDetail == null)
+                        return BadRequest($"Không tìm thấy sản phẩm {transfer.ProductId} trong kho {transfer.SourceId}.");
+                        
+                    // if (sourceDetail.Quantity < transfer.Quantity)
+                    //     return BadRequest($"Không đủ số lượng sản phẩm {transfer.ProductId} trong kho {transfer.SourceId} để chuyển.");
+
+                    if (targetDetail == null)
+                    {
+                        targetDetail = new WarehouseDetail
+                        {
+                            WareId = transfer.TargetId,
+                            ProId = transfer.ProductId,
+                            Quantity = transfer.Quantity,
+                        };
+                        await _uow.WarehouseDetailRepository.AddAsync(targetDetail);
+                    }
+                    else
+                    {
+                        targetDetail.Quantity += transfer.Quantity;
+                        _uow.WarehouseDetailRepository.Update(targetDetail);
+                    }
+                    sourceDetail.Quantity -= transfer.Quantity;
+                    _uow.WarehouseDetailRepository.Update(sourceDetail);
+
+                    await _uow.SaveChangesAsync();
+                }
+                await _uow.CommitAsync();
+                return Ok("Chuyển kho thành công.");
+            }
+            catch (Exception ex)
+            {
+                await _uow.RollbackAsync();
+                return BadRequest($"Lỗi khi chuyển kho: {ex.Message}");
+            }
+
+            
         }
     }
 

@@ -88,6 +88,9 @@ namespace WarehouseManagement.Controllers
         {
             var import = await _unitOfWork.ImportRepository.FindByIdAsync(id);
             if (import == null) return NotFound();
+            
+            if (import.Status == ImportEnum.Finished)
+                return BadRequest("Không thể cập nhật phiếu nhập đã hoàn thành.");
 
             // Update only if field is not null
             import.EmployId = dto.EmployId ?? import.EmployId;
@@ -113,6 +116,9 @@ namespace WarehouseManagement.Controllers
                 var import = await _unitOfWork.ImportRepository.FindByIdAsync(id);
                 if (import == null) return NotFound();
 
+                if (import.Status == ImportEnum.Finished)
+                    return BadRequest("Không thể cập nhật phiếu nhập đã hoàn thành.");
+                
                 // Update only if field is not null
                 import.EmployId = dto.EmployId ?? import.EmployId;
                 import.Status = dto.Status ?? import.Status;
@@ -141,8 +147,23 @@ namespace WarehouseManagement.Controllers
                     });
                     await _unitOfWork.Repository<ImportDetail>().AddRangeAsync(details);
                 }
-
                 await _unitOfWork.SaveChangesAsync();
+
+                if (dto.Status == ImportEnum.Finished)
+                {
+                    var importDetails = _unitOfWork.ImportDetailRepository.GetAll(x => x.ImpId == id);
+                    foreach (var detail in importDetails)
+                    {
+                        var product = await _unitOfWork.ProductRepository.FindByIdAsync(detail.ProId);
+                        if (product != null)
+                        {
+                            product.Quantity += detail.Quantity;
+                            _unitOfWork.ProductRepository.Update(product);
+                        }
+                    }
+                    await _unitOfWork.SaveChangesAsync();
+                }
+
                 await _unitOfWork.CommitAsync();
                 return Ok();
             }

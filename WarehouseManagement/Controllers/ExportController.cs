@@ -40,11 +40,12 @@ namespace WarehouseManagement.Controllers
                 await _unitOfWork.Repository<Export>().AddAsync(entity);
                 await _unitOfWork.SaveChangesAsync();
                 return Ok();
-            } catch (Exception)
+            }
+            catch (Exception)
             {
                 return StatusCode(400, "An error occurred while processing your request.");
             }
-            
+
         }
 
         [HttpPost("List")]
@@ -99,6 +100,9 @@ namespace WarehouseManagement.Controllers
             var entity = await repo.GetByIdAsync(id);
             if (entity == null) return NotFound();
 
+            if (entity.Status == ExportEnum.Finished)
+                return BadRequest("Không thể cập nhật phiếu xuất đã hoàn thành.");
+
             entity.EmployId = dto.EmployId ?? entity.EmployId;
             entity.Quantity = dto.Quantity ?? entity.Quantity;
             entity.TotalPrice = dto.TotalPrice ?? entity.TotalPrice;
@@ -123,8 +127,11 @@ namespace WarehouseManagement.Controllers
                 var entity = await repo.GetByIdAsync(id);
                 if (entity == null) return NotFound();
 
+                if (entity.Status == ExportEnum.Finished)
+                    return BadRequest("Không thể cập nhật phiếu xuất đã hoàn thành.");
+
                 // Clear existing details if any
-                var existingDetails = await _unitOfWork.Repository<ExportDetail>().GetAll(d => d.ExId == id).ToListAsync();
+                var existingDetails = _unitOfWork.Repository<ExportDetail>().GetAll(d => d.ExId == id);
                 if (existingDetails.Any())
                 {
                     _unitOfWork.Repository<ExportDetail>().DeleteRange(existingDetails);
@@ -156,6 +163,34 @@ namespace WarehouseManagement.Controllers
 
                 _unitOfWork.Repository<Export>().Update(entity);
                 await _unitOfWork.SaveChangesAsync();
+
+                if (entity.Status == ExportEnum.Finished)
+                {
+                    // Update product stock in warehouses
+                    foreach (var detail in dto.ExportDetails)
+                    {
+                        var warehouseDetail = await _unitOfWork.WarehouseDetailRepository.GetAll()
+                            .FirstOrDefaultAsync(x => x.WareId == detail.WareId && x.ProId == detail.ProId);
+                        if (warehouseDetail != null)
+                        {
+                            warehouseDetail.Quantity -= detail.Quantity;
+                            _unitOfWork.WarehouseDetailRepository.Update(warehouseDetail);
+                        }
+                    }
+                    await _unitOfWork.SaveChangesAsync();
+                    // Update product quantities
+                    foreach (var detail in dto.ExportDetails)
+                    {
+                        var product = await _unitOfWork.ProductRepository.FindByIdAsync(detail.ProId);
+                        if (product != null)
+                        {
+                            product.Quantity -= detail.Quantity;
+                            _unitOfWork.ProductRepository.Update(product);
+                        }
+                    }
+                    await _unitOfWork.SaveChangesAsync();
+                }
+
                 await _unitOfWork.CommitAsync();
                 return Ok();
             }
@@ -184,7 +219,7 @@ namespace WarehouseManagement.Controllers
             var entity = await _context.Exports
                 .Include(e => e.Employee)
                 .Include(e => e.ExportDetails)
-                    .ThenInclude(d => d.Product)
+                .ThenInclude(d => d.Product)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
             var whs = new List<Warehouse>();
@@ -227,7 +262,8 @@ namespace WarehouseManagement.Controllers
             var entities = await _unitOfWork.ExportRepository.GetAll()
                 .Include(e => e.Employee)
                 .Include(e => e.ExportDetails)
-                    .ThenInclude(d => d.Product)
+                .ThenInclude(d => d.Product)
+                .OrderByDescending(x => x.Id)
                 .ToListAsync();
 
             var whs = _unitOfWork.WarehouseRepository.GetAll();
