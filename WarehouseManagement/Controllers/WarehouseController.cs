@@ -107,19 +107,19 @@ namespace WarehouseManagement.Controllers
         [HttpPost("transfer")]
         public async Task<IActionResult> Transfer([FromBody] TransferWhRequestDto transferRequest)
         {
-            if (transferRequest.Transfers == null || !transferRequest.Transfers.Any())
+            if (transferRequest.TransferDetails == null || !transferRequest.TransferDetails.Any())
                 return BadRequest("Danh sách chuyển kho không được để trống.");
             await _uow.BeginTransactionAsync();
             try
             {
-                foreach (var transfer in transferRequest.Transfers)
+                foreach (var transfer in transferRequest.TransferDetails)
                 {
-                    var sourceDetail = _uow.WarehouseDetailRepository.GetAll(x => x.WareId == transfer.SourceId && x.ProId == transfer.ProductId).FirstOrDefault();
-                    var targetDetail = _uow.WarehouseDetailRepository.GetAll(x => x.WareId == transfer.TargetId && x.ProId == transfer.ProductId).FirstOrDefault();
+                    var sourceDetail = _uow.WarehouseDetailRepository.GetAll(x => x.WareId == transferRequest.SourceId && x.ProId == transfer.ProductId).FirstOrDefault();
+                    var targetDetail = _uow.WarehouseDetailRepository.GetAll(x => x.WareId == transferRequest.TargetId && x.ProId == transfer.ProductId).FirstOrDefault();
 
                     if (sourceDetail == null)
-                        return BadRequest($"Không tìm thấy sản phẩm {transfer.ProductId} trong kho {transfer.SourceId}.");
-                        
+                        return BadRequest($"Không tìm thấy sản phẩm {transfer.ProductId} trong kho {transferRequest.SourceId}.");
+
                     // if (sourceDetail.Quantity < transfer.Quantity)
                     //     return BadRequest($"Không đủ số lượng sản phẩm {transfer.ProductId} trong kho {transfer.SourceId} để chuyển.");
 
@@ -127,7 +127,7 @@ namespace WarehouseManagement.Controllers
                     {
                         targetDetail = new WarehouseDetail
                         {
-                            WareId = transfer.TargetId,
+                            WareId = transferRequest.TargetId,
                             ProId = transfer.ProductId,
                             Quantity = transfer.Quantity,
                         };

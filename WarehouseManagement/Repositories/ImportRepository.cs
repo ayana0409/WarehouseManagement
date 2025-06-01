@@ -39,7 +39,8 @@ namespace WarehouseManagement.Repositories
                     Quantity = detail.Quantity,
                     Price = detail.Price,
                     ManuDate = detail.ManuDate,
-                    ProductName = detail.Product?.ProName
+                    ProductName = detail.Product?.ProName,
+                    Unit = detail.Product?.Unit
                 }) : null
             };
         }
@@ -67,9 +68,10 @@ namespace WarehouseManagement.Repositories
                     Quantity = detail.Quantity,
                     Price = detail.Price,
                     ManuDate = detail.ManuDate,
-                    ProductName = detail.Product.ProName
+                    ProductName = detail.Product.ProName,
+                    Unit = detail.Product.Unit
                 }) : null
-            });
+            }).OrderByDescending(x => x.Id);
         }
     }
 

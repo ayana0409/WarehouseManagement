@@ -9,5 +9,6 @@ public class ImportDetailDto
     public double Quantity { get; set; }
     public double Price { get; set; }
     public DateTime ManuDate { get; set; }
+    public string? Unit { get; set; }
 }
 

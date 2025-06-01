@@ -131,25 +131,28 @@ namespace WarehouseManagement.Controllers
                     return BadRequest("Không thể cập nhật phiếu xuất đã hoàn thành.");
 
                 // Clear existing details if any
-                var existingDetails = _unitOfWork.Repository<ExportDetail>().GetAll(d => d.ExId == id);
-                if (existingDetails.Any())
+                if (entity.ExportDetails != null)
                 {
-                    _unitOfWork.Repository<ExportDetail>().DeleteRange(existingDetails);
-                    await _unitOfWork.SaveChangesAsync();
-                }
-
-                if (dto.ExportDetails != null && dto.ExportDetails.Any())
-                {
-                    var details = dto.ExportDetails.Select(x => new ExportDetail
+                    var existingDetails = _unitOfWork.Repository<ExportDetail>().GetAll(d => d.ExId == id);
+                    if (existingDetails.Any())
                     {
-                        ExId = entity.Id,
-                        ProId = x.ProId,
-                        WareId = x.WareId,
-                        Quantity = x.Quantity,
-                        Price = x.Price
-                    });
-                    await _unitOfWork.Repository<ExportDetail>().AddRangeAsync(details);
-                    await _unitOfWork.SaveChangesAsync();
+                        _unitOfWork.Repository<ExportDetail>().DeleteRange(existingDetails);
+                        await _unitOfWork.SaveChangesAsync();
+                    }
+
+                    if (dto.ExportDetails != null && dto.ExportDetails.Any())
+                    {
+                        var details = dto.ExportDetails.Select(x => new ExportDetail
+                        {
+                            ExId = entity.Id,
+                            ProId = x.ProId,
+                            WareId = x.WareId,
+                            Quantity = x.Quantity,
+                            Price = x.Price
+                        });
+                        await _unitOfWork.Repository<ExportDetail>().AddRangeAsync(details);
+                        await _unitOfWork.SaveChangesAsync();
+                    }
                 }
 
                 // Update the main export entity

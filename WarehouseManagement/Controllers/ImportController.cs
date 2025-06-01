@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 using WarehouseManagement.DTOs.Request;
 using WarehouseManagement.DTOs.Response;
 using WarehouseManagement.Model;
@@ -43,6 +44,8 @@ namespace WarehouseManagement.Controllers
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                Console.WriteLine($"User ID: {userId}");
                 var entity = new Import
                 {
                     Quantity = dto.Details != null ? dto.Details.Sum(x => x.Quantity) : 0,
@@ -99,6 +102,7 @@ namespace WarehouseManagement.Controllers
             import.Tel = dto.Tel ?? import.Tel;
             import.Address = dto.Address ?? import.Address;
             import.Email = dto.Email ?? import.Email;
+            import.Status = ImportEnum.New;
 
             _unitOfWork.ImportRepository.Update(import);
             await _unitOfWork.SaveChangesAsync();
@@ -126,28 +130,32 @@ namespace WarehouseManagement.Controllers
                 import.Tel = dto.Tel ?? import.Tel;
                 import.Address = dto.Address ?? import.Address;
                 import.Email = dto.Email ?? import.Email;
+                import.Status = dto.Status ?? import.Status;
 
                 _unitOfWork.ImportRepository.Update(import);
                 await _unitOfWork.SaveChangesAsync();
 
-                var existDetail = _unitOfWork.ImportDetailRepository.GetAll(x => x.ImpId.Equals(id));
-                _unitOfWork.ImportDetailRepository.DeleteRange(existDetail);
-                await _unitOfWork.SaveChangesAsync();
-
-                // Assuming ExportDetails are part of the request DTO
-                if (dto.Details != null && dto.Details.Any())
+                if (dto.Details != null)
                 {
-                    var details = dto.Details.Select(x => new ImportDetail
+                    var existDetail = _unitOfWork.ImportDetailRepository.GetAll(x => x.ImpId.Equals(id));
+                    _unitOfWork.ImportDetailRepository.DeleteRange(existDetail);
+                    await _unitOfWork.SaveChangesAsync();
+
+                    // Assuming ExportDetails are part of the request DTO
+                    if (dto.Details != null && dto.Details.Any())
                     {
-                        ProId = x.ProId,
-                        Quantity = x.Quantity,
-                        Price = x.Price,
-                        ImpId = import.Id,
-                        ManuDate = x.ManuDate
-                    });
-                    await _unitOfWork.Repository<ImportDetail>().AddRangeAsync(details);
+                        var details = dto.Details.Select(x => new ImportDetail
+                        {
+                            ProId = x.ProId,
+                            Quantity = x.Quantity,
+                            Price = x.Price,
+                            ImpId = import.Id,
+                            ManuDate = x.ManuDate
+                        });
+                        await _unitOfWork.Repository<ImportDetail>().AddRangeAsync(details);
+                    }
+                    await _unitOfWork.SaveChangesAsync();
                 }
-                await _unitOfWork.SaveChangesAsync();
 
                 if (dto.Status == ImportEnum.Finished)
                 {
