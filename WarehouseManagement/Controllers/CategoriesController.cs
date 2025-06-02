@@ -8,7 +8,7 @@ using WarehouseManagement.Share.Enumeration;
 namespace WarehouseManagement.Controllers
 {
     [ApiController]
-    //[Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin, Manager")]
     [Route("api/[controller]")]
     public class CategoriesController : ControllerBase
     {
@@ -56,6 +56,7 @@ namespace WarehouseManagement.Controllers
 
             if (dto.Name != null) category.Name = dto.Name;
             if (dto.Image != null) category.Image = dto.Image;
+            if (dto.IsActive != null) category.IsActive = (bool)dto.IsActive;
 
             _unitOfWork.CategoryRepository.Update(category);
             await _unitOfWork.SaveChangesAsync();

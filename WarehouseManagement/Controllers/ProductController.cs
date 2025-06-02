@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WarehouseManagement.DTOs.Request;
 using WarehouseManagement.DTOs.Response;
@@ -19,6 +20,7 @@ namespace WarehouseManagement.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin, Manager")]
         public async Task<IActionResult> Create([FromBody] ProductCreateDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -31,7 +33,9 @@ namespace WarehouseManagement.Controllers
                 Image = dto.Image,
                 Unit = dto.Unit ?? "cái",
                 Expiry = dto.Expiry ?? 0,
-                IsActive = true
+                IsActive = true,
+                ExportPrice = dto.ExportPrice,
+                ImportPrice = dto.ImportPrice,
             };
 
             await _unitOfWork.ProductRepository.AddAsync(product);
@@ -41,6 +45,7 @@ namespace WarehouseManagement.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin, Manager")]
         public async Task<IActionResult> Update(int id, [FromBody] ProductUpdateDto dto)
         {
             var product = await _unitOfWork.ProductRepository.FindByIdAsync(id);
@@ -54,6 +59,9 @@ namespace WarehouseManagement.Controllers
             if (dto.CateId.HasValue) product.CateId = dto.CateId.Value;
             if (dto.ManuId.HasValue) product.ManuId = dto.ManuId.Value;
             if (dto.IsActive.HasValue) product.IsActive = dto.IsActive.Value;
+            if (dto.ImportPrice != null) product.ImportPrice = (double)dto.ImportPrice;
+            if (dto.ExportPrice != null) product.ExportPrice = (double)dto.ExportPrice;
+
 
             _unitOfWork.ProductRepository.Update(product);
             await _unitOfWork.SaveChangesAsync();
@@ -63,6 +71,7 @@ namespace WarehouseManagement.Controllers
 
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin, Manager")]
         public async Task<IActionResult> Delete(int id)
         {
             var product = await _unitOfWork.ProductRepository.FindByIdAsync(id);
@@ -75,6 +84,7 @@ namespace WarehouseManagement.Controllers
             return NoContent();
         }
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAll([FromQuery] bool? isActive = null, [FromQuery] string? keyWord = null)
         {
             var query = _unitOfWork.ProductRepository
@@ -98,15 +108,19 @@ namespace WarehouseManagement.Controllers
                     Expiry = p.Expiry,
                     CreatedDate = p.CreateDate,
                     Quantity = p.Quantity,
+                    UnallocatedStock = p.UnallocatedStock,
                     ManufacturerName = p.Manufacturer != null ? p.Manufacturer.ManuName : null,
                     CategoryName = p.Category != null ? p.Category.Name : null,
-                    IsActive = p.IsActive
+                    IsActive = p.IsActive,
+                    ExportPrice = p.ExportPrice,
+                    ImportPrice = p.ImportPrice,
                 }).ToListAsync();
 
             return Ok(result);
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetDetail(int id)
         {
             var product = await _unitOfWork.ProductRepository.GetAll()
@@ -122,8 +136,11 @@ namespace WarehouseManagement.Controllers
                     Expiry = p.Expiry,
                     CreatedDate = p.CreateDate,
                     Quantity = p.Quantity,
+                    UnallocatedStock = p.UnallocatedStock,
                     ManufacturerName = p.Manufacturer != null ? p.Manufacturer.ManuName : null,
-                    CategoryName = p.Category != null ? p.Category.Name : null
+                    CategoryName = p.Category != null ? p.Category.Name : null,
+                    ImportPrice= p.ImportPrice,
+                    ExportPrice= p.ExportPrice,
                 }).FirstOrDefaultAsync();
 
             if (product == null) return NotFound();

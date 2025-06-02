@@ -1,4 +1,6 @@
-﻿namespace WarehouseManagement.DTOs.Request
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace WarehouseManagement.DTOs.Request
 {
     public class ProductUpdateDto
     {
@@ -9,6 +11,8 @@
         public int? CateId { get; set; }
         public int? ManuId { get; set; }
         public bool? IsActive { get; set; }
+        public double? ImportPrice { get; set; }
+        public double? ExportPrice { get; set; }
     }
 
 }

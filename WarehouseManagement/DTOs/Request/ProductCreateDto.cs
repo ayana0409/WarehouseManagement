@@ -16,6 +16,10 @@ namespace WarehouseManagement.DTOs.Request
         public string? Image { get; set; }
         public string? Unit { get; set; }
         public int? Expiry { get; set; }
+        [Required]
+        public double ImportPrice { get; set; }
+        [Required]
+        public double ExportPrice { get; set; }
     }
 
 }

@@ -21,7 +21,8 @@ namespace WarehouseManagement.Repositories
             {
                 Id = c.Id,
                 Name = c.Name,
-                Image = c.Image
+                Image = c.Image,
+                IsActive = c.IsActive
             }).ToListAsync();
         }
 
@@ -32,7 +33,8 @@ namespace WarehouseManagement.Repositories
             {
                 Id = category.Id,
                 Name = category.Name,
-                Image = category.Image
+                Image = category.Image,
+                IsActive = category.IsActive
             };
         }
     }

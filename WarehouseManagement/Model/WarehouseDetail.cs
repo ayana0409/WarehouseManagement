@@ -17,7 +17,6 @@ namespace WarehouseManagement.Model
         public Product? Product { get; set; }
 
         [JsonIgnore]
-        [ForeignKey(nameof(WareId))]
         public Warehouse? Warehouse { get; set; }
     }
 

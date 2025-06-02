@@ -24,7 +24,8 @@ namespace WarehouseManagement.Repositories
                 Address = x.Address,
                 Tel = x.Tel,
                 Email = x.Email,
-                Website = x.Website
+                Website = x.Website,
+                IsActive = x.IsActive
             }).ToListAsync();
         }
 
@@ -38,7 +39,8 @@ namespace WarehouseManagement.Repositories
                 Address = entity.Address,
                 Tel = entity.Tel,
                 Email = entity.Email,
-                Website = entity.Website
+                Website = entity.Website,
+                IsActive = entity.IsActive
             };
         }
     }

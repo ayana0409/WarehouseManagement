@@ -1,6 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using WarehouseManagement.DTOs.Request;
@@ -11,6 +12,7 @@ using WarehouseManagement.Share.Enumeration;
 namespace WarehouseManagement.Controllers
 {
     [ApiController]
+    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     public class EmployeeController : ControllerBase
     {
@@ -35,13 +37,27 @@ namespace WarehouseManagement.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] EmployeeUpdateDto dto)
         {
-            if (dto.Code != null)
+            var emp = await _uow.EmployeeRepository.FindByIdAsync(id);
+            if (emp == null) return BadRequest("Không tìm thấy nhân viên.");
+
+            if (dto.Code != null && dto.Code != emp.Code)
             {
                 var existEmployee = await _uow.EmployeeRepository.GetByCode(dto.Code);
                 if (existEmployee != null)
                     return BadRequest($"Mã nhân viên {dto.Code} đã tồn tại.");
-
             }
+
+            if (dto.Name != null) emp.Name = dto.Name;
+            if (dto.Code != null) emp.Code = dto.Code;
+            if (dto.Gender.HasValue) emp.Gender = dto.Gender.Value;
+            if (dto.Tel != null) emp.Tel = dto.Tel;
+            if (dto.Email != null) emp.Email = dto.Email;
+            if (dto.Address != null) emp.Address = dto.Address;
+            if (dto.Role.HasValue) emp.Role = dto.Role.Value;
+            if (dto.IsActive.HasValue) emp.IsActive = dto.IsActive;
+
+            _uow.EmployeeRepository.Update(emp);
+
             var updated = await _uow.EmployeeRepository.UpdatePartialAsync(id, dto);
             await _uow.SaveChangesAsync();
             return Ok(updated);
@@ -118,21 +134,21 @@ namespace WarehouseManagement.Controllers
 
         // login jwt
         [HttpPost("Login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(LoginDto dto)
         {
             if (string.IsNullOrEmpty(dto.Username) || string.IsNullOrEmpty(dto.Password))
                 return BadRequest("Tên đăng nhập và mật khẩu không được để trống.");
 
-
             var employee = await _uow.EmployeeRepository.GetByCode(dto.Username);
             if (employee == null)
-                return Unauthorized("Tài khoản không tồn tại.");
+                return BadRequest("Tài khoản không tồn tại.");
 
             if (employee.Password != dto.Password)
-                return Unauthorized("Mật khẩu không đúng.");
+                return BadRequest("Mật khẩu không đúng.");
 
             if (employee.IsActive == null || !employee.IsActive.Value)
-                return Unauthorized("Tài khoản đã bị khóa vĩnh viễn.");
+                return BadRequest("Tài khoản đã bị khóa vĩnh viễn.");
 
             // Generate JWT token here (not implemented in this snippet)
             var token = GenerateJwtToken(employee);
@@ -146,7 +162,7 @@ namespace WarehouseManagement.Controllers
                 Token = token
             });
         }
-        
+
         private string GenerateJwtToken(Employee employee)
         {
             var tokenHandler = new JwtSecurityTokenHandler();

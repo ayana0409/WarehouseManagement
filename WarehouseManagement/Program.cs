@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,6 +56,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddLogging();
 
 builder.Services.AddCors(options =>
 {
@@ -86,7 +88,8 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = false,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("dh21kpm02-httt-jwtsecretkey@1234567890"))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("dh21kpm02-httt-jwtsecretkey@1234567890")),
+        RoleClaimType = ClaimTypes.Role
     };
 });
 

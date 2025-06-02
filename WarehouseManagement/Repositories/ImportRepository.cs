@@ -29,6 +29,7 @@ namespace WarehouseManagement.Repositories
                 Quantity = entity.Quantity,
                 Status = entity.Status,
                 SupplierName = entity.SupplierName,
+                EmployeeName = entity.Employee?.Name ?? "",
                 Tel = entity.Tel,
                 TotalPrice = entity.TotalPrice,
                 ImportDetails = entity.ImportDetails != null ? entity.ImportDetails.Select(detail => new ImportDetailDto
@@ -59,6 +60,7 @@ namespace WarehouseManagement.Repositories
                 Status = entity.Status,
                 SupplierName = entity.SupplierName,
                 Tel = entity.Tel,
+                EmployeeName = entity.Employee != null ? entity.Employee.Name : "",
                 TotalPrice = entity.TotalPrice,
                 ImportDetails = entity.ImportDetails != null ? entity.ImportDetails.Select(detail => new ImportDetailDto
                 {

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WarehouseManagement.DTOs.Request;
 using WarehouseManagement.Model;
 using WarehouseManagement.Repository.Abtraction;
@@ -6,6 +7,7 @@ using WarehouseManagement.Repository.Abtraction;
 namespace WarehouseManagement.Controllers
 {
     [ApiController]
+    [Authorize(Roles = "Admin, Manager")]
     [Route("api/[controller]")]
     public class ManufacturersController : ControllerBase
     {
@@ -73,9 +75,7 @@ namespace WarehouseManagement.Controllers
             if (dto.Tel != null) entity.Tel = dto.Tel;
             if (dto.Email != null) entity.Email = dto.Email;
             if (dto.Website != null) entity.Website = dto.Website;
-
-            // Optional: đảm bảo vẫn giữ IsActive = true nếu bạn muốn
-            entity.IsActive = true;
+            if (dto.IsActive != null) entity.IsActive = (bool)dto.IsActive;
 
             _unitOfWork.ManufacturerRepository.Update(entity);
             await _unitOfWork.SaveChangesAsync();

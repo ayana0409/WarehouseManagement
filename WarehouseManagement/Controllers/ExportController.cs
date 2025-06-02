@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WarehouseManagement.DTOs.Request;
 using WarehouseManagement.DTOs.Response;
@@ -9,6 +11,7 @@ using WarehouseManagement.Share.Enumeration;
 namespace WarehouseManagement.Controllers
 {
     [ApiController]
+    [Authorize(Roles = "Admin, Manager, Employee")]
     [Route("api/[controller]")]
     public class ExportController : ControllerBase
     {
@@ -26,9 +29,10 @@ namespace WarehouseManagement.Controllers
         {
             try
             {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 var entity = new Export
                 {
-                    EmployId = (int)dto.EmployId,
+                    EmployId = int.Parse(userId),
                     Quantity = dto.Quantity,
                     TotalPrice = dto.TotalPrice,
                     ConsumerName = dto.ConsumerName,
@@ -53,10 +57,11 @@ namespace WarehouseManagement.Controllers
         {
             try
             {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 await _unitOfWork.BeginTransactionAsync();
                 var entity = new Export
                 {
-                    EmployId = (int)dto.EmployId,
+                    EmployId = int.Parse(userId),
                     Quantity = dto.ExportDetails != null ? dto.ExportDetails.Sum(x => x.Quantity) : 0,
                     TotalPrice = dto.ExportDetails != null ? dto.ExportDetails.Sum(x => x.Price * x.Quantity)! : 0,
                     ConsumerName = dto.ConsumerName,
@@ -68,21 +73,36 @@ namespace WarehouseManagement.Controllers
                 await _unitOfWork.Repository<Export>().AddAsync(entity);
                 await _unitOfWork.SaveChangesAsync();
 
-                // Assuming ExportDetails are part of the request DTO
                 if (dto.ExportDetails != null && dto.ExportDetails.Any())
                 {
-                    var details = dto.ExportDetails.Select(x => new ExportDetail
+                    var products = _unitOfWork.WarehouseDetailRepository.GetAll(x => 
+                                dto.ExportDetails.Select(x => x.ProId).Contains(x.ProId) 
+                                && dto.ExportDetails.Select(x => x.WareId).Contains(x.WareId));
+                    // Assuming ExportDetails are part of the request DTO
+                    if (dto.ExportDetails != null && dto.ExportDetails.Any())
                     {
-                        ExId = entity.Id,
-                        ProId = x.ProId,
-                        WareId = x.WareId,
-                        Quantity = x.Quantity,
-                        Price = x.Price
-                    });
-                    await _unitOfWork.Repository<ExportDetail>().AddRangeAsync(details);
-                }
+                        var detailList = new List<ExportDetail>();
+                        foreach (var detail in dto.ExportDetails)
+                        {
+                            var product = products.FirstOrDefault(x => x.ProId.Equals(detail.ProId) && x.WareId.Equals(detail.WareId));
+                            if (detail.Quantity > product.Quantity)
+                                return BadRequest($"Số lượng tối đa: {product.Quantity}");
 
-                await _unitOfWork.SaveChangesAsync();
+                            detailList.Add(new ExportDetail
+                            {
+                                ExId = entity.Id,
+                                ProId = detail.ProId,
+                                WareId = detail.WareId,
+                                Quantity = detail.Quantity,
+                                Price = detail.Price
+                            });
+                        }
+                        await _unitOfWork.Repository<ExportDetail>().AddRangeAsync(detailList);
+                    }
+
+                    await _unitOfWork.SaveChangesAsync();
+                }
+                
                 await _unitOfWork.CommitAsync();
                 return Ok();
             }
@@ -131,9 +151,9 @@ namespace WarehouseManagement.Controllers
                     return BadRequest("Không thể cập nhật phiếu xuất đã hoàn thành.");
 
                 // Clear existing details if any
-                if (entity.ExportDetails != null)
+                var existingDetails = _unitOfWork.Repository<ExportDetail>().GetAll(d => d.ExId == id);
+                if (existingDetails != null)
                 {
-                    var existingDetails = _unitOfWork.Repository<ExportDetail>().GetAll(d => d.ExId == id);
                     if (existingDetails.Any())
                     {
                         _unitOfWork.Repository<ExportDetail>().DeleteRange(existingDetails);
@@ -142,15 +162,32 @@ namespace WarehouseManagement.Controllers
 
                     if (dto.ExportDetails != null && dto.ExportDetails.Any())
                     {
-                        var details = dto.ExportDetails.Select(x => new ExportDetail
+                        var products = _unitOfWork.WarehouseDetailRepository.GetAll(x =>
+                            dto.ExportDetails.Select(x => x.ProId).Contains(x.ProId)
+                            && dto.ExportDetails.Select(x => x.WareId).Contains(x.WareId))
+                            .Include(x => x.Product);
+                        // Assuming ExportDetails are part of the request DTO
+                        if (dto.ExportDetails != null && dto.ExportDetails.Any())
                         {
-                            ExId = entity.Id,
-                            ProId = x.ProId,
-                            WareId = x.WareId,
-                            Quantity = x.Quantity,
-                            Price = x.Price
-                        });
-                        await _unitOfWork.Repository<ExportDetail>().AddRangeAsync(details);
+                            var detailList = new List<ExportDetail>();
+                            foreach (var detail in dto.ExportDetails)
+                            {
+                                var product = products.FirstOrDefault(x => x.ProId.Equals(detail.ProId) && x.WareId.Equals(detail.WareId));
+                                if (detail.Quantity > product.Quantity)
+                                    return BadRequest($"Số lượng tối đa của {product.Product.ProName} trong kho: {product.Quantity}");
+
+                                detailList.Add(new ExportDetail
+                                {
+                                    ExId = entity.Id,
+                                    ProId = detail.ProId,
+                                    WareId = detail.WareId,
+                                    Quantity = detail.Quantity,
+                                    Price = detail.Price
+                                });
+                            }
+                            await _unitOfWork.Repository<ExportDetail>().AddRangeAsync(detailList);
+                        }
+
                         await _unitOfWork.SaveChangesAsync();
                     }
                 }

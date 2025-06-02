@@ -6,6 +6,7 @@ namespace WarehouseManagement.DTOs.Response
     {
         public int Id { get; set; }
         public int EmployId { get; set; }
+        public string? EmployeeName { get; set; }
         public DateTime CreateDate { get; set; }
         public double Quantity { get; set; }
         public double TotalPrice { get; set; }

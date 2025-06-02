@@ -66,6 +66,21 @@ namespace WarehouseManagement.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TransferLogs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    WhSourceId = table.Column<int>(type: "int", nullable: false),
+                    WhTargetId = table.Column<int>(type: "int", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TransferLogs", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Warehouses",
                 columns: table => new
                 {
@@ -177,7 +192,6 @@ namespace WarehouseManagement.Migrations
                     WareId = table.Column<int>(type: "int", nullable: false),
                     Quantity = table.Column<double>(type: "float", nullable: false),
                     Price = table.Column<double>(type: "float", nullable: true),
-                    Status = table.Column<int>(type: "int", nullable: true),
                     ExportId = table.Column<int>(type: "int", nullable: true),
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1")
@@ -194,6 +208,12 @@ namespace WarehouseManagement.Migrations
                         name: "FK_ExportDetails_Products_ProId",
                         column: x => x.ProId,
                         principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ExportDetails_Warehouses_WareId",
+                        column: x => x.WareId,
+                        principalTable: "Warehouses",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -228,12 +248,38 @@ namespace WarehouseManagement.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TransferLogDetails",
+                columns: table => new
+                {
+                    LogId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    Quantity = table.Column<double>(type: "float", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TransferLogDetails", x => new { x.LogId, x.ProductId });
+                    table.ForeignKey(
+                        name: "FK_TransferLogDetails_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_TransferLogDetails_TransferLogs_LogId",
+                        column: x => x.LogId,
+                        principalTable: "TransferLogs",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "WarehouseDetails",
                 columns: table => new
                 {
                     ProId = table.Column<int>(type: "int", nullable: false),
                     WareId = table.Column<int>(type: "int", nullable: false),
-                    Quantity = table.Column<double>(type: "float", nullable: false)
+                    Quantity = table.Column<double>(type: "float", nullable: false),
+                    WarehouseId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -245,11 +291,10 @@ namespace WarehouseManagement.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_WarehouseDetails_Warehouses_WareId",
-                        column: x => x.WareId,
+                        name: "FK_WarehouseDetails_Warehouses_WarehouseId",
+                        column: x => x.WarehouseId,
                         principalTable: "Warehouses",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
@@ -261,6 +306,11 @@ namespace WarehouseManagement.Migrations
                 name: "IX_ExportDetails_ProId",
                 table: "ExportDetails",
                 column: "ProId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ExportDetails_WareId",
+                table: "ExportDetails",
+                column: "WareId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Exports_EmployId",
@@ -288,9 +338,14 @@ namespace WarehouseManagement.Migrations
                 column: "ManuId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_WarehouseDetails_WareId",
+                name: "IX_TransferLogDetails_ProductId",
+                table: "TransferLogDetails",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_WarehouseDetails_WarehouseId",
                 table: "WarehouseDetails",
-                column: "WareId");
+                column: "WarehouseId");
         }
 
         /// <inheritdoc />
@@ -303,6 +358,9 @@ namespace WarehouseManagement.Migrations
                 name: "ImportDetails");
 
             migrationBuilder.DropTable(
+                name: "TransferLogDetails");
+
+            migrationBuilder.DropTable(
                 name: "WarehouseDetails");
 
             migrationBuilder.DropTable(
@@ -310,6 +368,9 @@ namespace WarehouseManagement.Migrations
 
             migrationBuilder.DropTable(
                 name: "Imports");
+
+            migrationBuilder.DropTable(
+                name: "TransferLogs");
 
             migrationBuilder.DropTable(
                 name: "Products");

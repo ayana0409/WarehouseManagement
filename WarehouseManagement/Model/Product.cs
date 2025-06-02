@@ -13,6 +13,9 @@ namespace WarehouseManagement.Model
         [JsonIgnore]
         public DateTime CreateDate { get; set; } = DateTime.Now;
         public double Quantity { get; set; } = 0;
+        public double UnallocatedStock { get; set; } = 0;
+        public double ImportPrice { get; set; } = 0;
+        public double ExportPrice { get; set; } = 0;
         public string Unit { get; set; }
         public int Expiry { get; set; } = 0;
         public bool IsActive { get; set; } = true;

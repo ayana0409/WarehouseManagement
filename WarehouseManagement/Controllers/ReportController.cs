@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WarehouseManagement.DTOs.Response;
@@ -7,6 +8,7 @@ using WarehouseManagement.Share.Enumeration;
 namespace WarehouseManagement.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class ReportController : ControllerBase
 {

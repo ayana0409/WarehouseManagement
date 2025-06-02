@@ -5,24 +5,24 @@
 namespace WarehouseManagement.Migrations
 {
     /// <inheritdoc />
-    public partial class changeField : Migration
+    public partial class fixDb2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Status",
-                table: "ExportDetails");
+            migrationBuilder.AddColumn<string>(
+                name: "Description",
+                table: "TransferLogs",
+                type: "nvarchar(max)",
+                nullable: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "Status",
-                table: "ExportDetails",
-                type: "int",
-                nullable: true);
+            migrationBuilder.DropColumn(
+                name: "Description",
+                table: "TransferLogs");
         }
     }
 }

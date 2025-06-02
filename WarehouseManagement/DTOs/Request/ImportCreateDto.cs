@@ -5,6 +5,7 @@ namespace WarehouseManagement.DTOs.Request
 {
     public class ImportCreateDto
     {
+        [JsonIgnore]
         public int? EmployId { get; set; }
         public ImportEnum? Status { get; set; } = ImportEnum.New;
         public string? SupplierName { get; set; }

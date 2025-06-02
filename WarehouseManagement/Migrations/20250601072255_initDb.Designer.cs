@@ -12,7 +12,7 @@ using WarehouseManagement;
 namespace WarehouseManagement.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250530081214_initDb")]
+    [Migration("20250601072255_initDb")]
     partial class initDb
     {
         /// <inheritdoc />
@@ -157,14 +157,13 @@ namespace WarehouseManagement.Migrations
                     b.Property<double>("Quantity")
                         .HasColumnType("float");
 
-                    b.Property<int?>("Status")
-                        .HasColumnType("int");
-
                     b.HasKey("ExId", "ProId", "WareId");
 
                     b.HasIndex("ExportId");
 
                     b.HasIndex("ProId");
+
+                    b.HasIndex("WareId");
 
                     b.ToTable("ExportDetails");
                 });
@@ -322,6 +321,46 @@ namespace WarehouseManagement.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("WarehouseManagement.Model.TransferLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("WhSourceId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WhTargetId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TransferLogs");
+                });
+
+            modelBuilder.Entity("WarehouseManagement.Model.TransferLogDetail", b =>
+                {
+                    b.Property<int>("LogId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Quantity")
+                        .HasColumnType("float");
+
+                    b.HasKey("LogId", "ProductId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("TransferLogDetails");
+                });
+
             modelBuilder.Entity("WarehouseManagement.Model.Warehouse", b =>
                 {
                     b.Property<int>("Id")
@@ -364,9 +403,12 @@ namespace WarehouseManagement.Migrations
                     b.Property<double>("Quantity")
                         .HasColumnType("float");
 
+                    b.Property<int?>("WarehouseId")
+                        .HasColumnType("int");
+
                     b.HasKey("ProId", "WareId");
 
-                    b.HasIndex("WareId");
+                    b.HasIndex("WarehouseId");
 
                     b.ToTable("WarehouseDetails");
                 });
@@ -394,7 +436,15 @@ namespace WarehouseManagement.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("WarehouseManagement.Model.Warehouse", "WarehouseInfo")
+                        .WithMany("ExportDetails")
+                        .HasForeignKey("WareId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Product");
+
+                    b.Navigation("WarehouseInfo");
                 });
 
             modelBuilder.Entity("WarehouseManagement.Model.Import", b =>
@@ -446,6 +496,25 @@ namespace WarehouseManagement.Migrations
                     b.Navigation("Manufacturer");
                 });
 
+            modelBuilder.Entity("WarehouseManagement.Model.TransferLogDetail", b =>
+                {
+                    b.HasOne("WarehouseManagement.Model.TransferLog", "LogInfo")
+                        .WithMany()
+                        .HasForeignKey("LogId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WarehouseManagement.Model.Product", "ProductInfo")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("LogInfo");
+
+                    b.Navigation("ProductInfo");
+                });
+
             modelBuilder.Entity("WarehouseManagement.Model.WarehouseDetail", b =>
                 {
                     b.HasOne("WarehouseManagement.Model.Product", "Product")
@@ -454,15 +523,11 @@ namespace WarehouseManagement.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WarehouseManagement.Model.Warehouse", "Warehouse")
+                    b.HasOne("WarehouseManagement.Model.Warehouse", null)
                         .WithMany("WarehouseDetails")
-                        .HasForeignKey("WareId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("WarehouseId");
 
                     b.Navigation("Product");
-
-                    b.Navigation("Warehouse");
                 });
 
             modelBuilder.Entity("WarehouseManagement.Model.Export", b =>
@@ -477,6 +542,8 @@ namespace WarehouseManagement.Migrations
 
             modelBuilder.Entity("WarehouseManagement.Model.Warehouse", b =>
                 {
+                    b.Navigation("ExportDetails");
+
                     b.Navigation("WarehouseDetails");
                 });
 #pragma warning restore 612, 618

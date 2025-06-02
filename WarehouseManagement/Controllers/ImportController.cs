@@ -1,28 +1,32 @@
 ﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WarehouseManagement.DTOs.Request;
-using WarehouseManagement.DTOs.Response;
 using WarehouseManagement.Model;
-using WarehouseManagement.Repositories.Interfaces;
 using WarehouseManagement.Repository.Abtraction;
 using WarehouseManagement.Share.Enumeration;
 
 namespace WarehouseManagement.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class ImportController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<ImportController> logger;
 
-        public ImportController(IUnitOfWork unitOfWork)
+        public ImportController(IUnitOfWork unitOfWork, ILogger<ImportController> logger)
         {
             _unitOfWork = unitOfWork;
+            this.logger = logger;
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] ImportCreateDto dto)
         {
+            
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var import = new Import
             {
                 Address = dto.Address,
@@ -30,8 +34,7 @@ namespace WarehouseManagement.Controllers
                 SupplierName = dto.SupplierName,
                 Status = (ImportEnum)dto.Status,
                 Email = dto.Email,
-                EmployId = (int)dto.EmployId,
-
+                EmployId = int.Parse(userId)
             };
             await _unitOfWork.ImportRepository.AddAsync(import);
             await _unitOfWork.SaveChangesAsync();
@@ -44,8 +47,7 @@ namespace WarehouseManagement.Controllers
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                Console.WriteLine($"User ID: {userId}");
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 var entity = new Import
                 {
                     Quantity = dto.Details != null ? dto.Details.Sum(x => x.Quantity) : 0,
@@ -55,7 +57,7 @@ namespace WarehouseManagement.Controllers
                     Status = ImportEnum.New,
                     SupplierName = dto.SupplierName,
                     Email = dto.Email,
-                    EmployId = (int)dto.EmployId
+                    EmployId = int.Parse(userId),
                 };
 
                 await _unitOfWork.Repository<Import>().AddAsync(entity);
@@ -70,7 +72,7 @@ namespace WarehouseManagement.Controllers
                         Quantity = x.Quantity,
                         Price = x.Price,
                         ImpId = entity.Id,
-                        ManuDate = x.ManuDate
+                        ManuDate = x.ManuDate,
                     });
                     await _unitOfWork.Repository<ImportDetail>().AddRangeAsync(details);
                 }
@@ -150,7 +152,7 @@ namespace WarehouseManagement.Controllers
                             Quantity = x.Quantity,
                             Price = x.Price,
                             ImpId = import.Id,
-                            ManuDate = x.ManuDate
+                            ManuDate = x.ManuDate,
                         });
                         await _unitOfWork.Repository<ImportDetail>().AddRangeAsync(details);
                     }
@@ -166,8 +168,10 @@ namespace WarehouseManagement.Controllers
                         if (product != null)
                         {
                             product.Quantity += detail.Quantity;
+                            product.UnallocatedStock += detail.Quantity;
                             _unitOfWork.ProductRepository.Update(product);
                         }
+                        
                     }
                     await _unitOfWork.SaveChangesAsync();
                 }

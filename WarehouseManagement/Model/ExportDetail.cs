@@ -1,8 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using WarehouseManagement.Share;
-using WarehouseManagement.Share.Enumeration;
 
 namespace WarehouseManagement.Model
 {
